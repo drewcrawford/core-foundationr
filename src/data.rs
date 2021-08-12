@@ -1,24 +1,21 @@
-use crate::base::{CFTypeRef, CFAllocatorRef, CFIndex};
+use crate::base::{CFTypeRef, CFAllocatorRef, CFIndex, OpaqueCType};
 use std::ffi::c_void;
 use crate::cell::StrongCell;
-use std::marker::PhantomData;
 
 extern "C" {
-    //not actually static
-    fn CFDataCreate(allocator: CFAllocatorRef, bytes: *const u8, length: CFIndex) -> CFDataRef<'static>;
+    fn CFDataCreate(allocator: *const CFAllocatorRef, bytes: *const u8, length: CFIndex) -> *const CFDataRef;
 }
 
-#[repr(transparent)]
-#[derive(Debug,Clone)]
-pub struct CFDataRef<'a>(*const c_void,PhantomData<&'a ()>);
-impl<'a> CFTypeRef for CFDataRef<'a> {
+#[repr(C)]
+pub struct CFDataRef(OpaqueCType);
+impl CFTypeRef for CFDataRef {
 
     fn as_ptr(&self) -> *const c_void {
-        self.0
+        self as *const Self as *const c_void
     }
-    unsafe fn from_ptr(ptr: *const c_void) -> Self { Self(ptr, PhantomData::default())}
+    unsafe fn from_ptr(ptr: *const c_void) -> *const Self { ptr as *const Self }
 }
-impl<'a> CFDataRef<'a> {
+impl CFDataRef {
     //- note: objc knows a faster path for owned strings
     //- note: uncertain about faster path for static strings?
     pub fn from_str(str: &str) -> StrongCell<CFDataRef> {

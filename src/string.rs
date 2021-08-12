@@ -33,7 +33,7 @@ impl CFStringRef {
         }
     }
     pub fn length(&self) -> CFIndex {
-        unsafe { CFStringGetLength(self.clone())}
+        unsafe { CFStringGetLength(self)}
     }
     ///note: objc knows a faster way to return an inner pointer in some cases
     pub fn as_string(&self) -> String {
@@ -47,7 +47,7 @@ impl CFStringRef {
             length
         };
         let mut used_buf_len = 0;
-        unsafe{ CFStringGetBytes(self.clone(), range, CFStringEncoding::UTF8, 255, false, mut_ptr, string.capacity() as i64, &mut used_buf_len)};
+        unsafe{ CFStringGetBytes(self, range, CFStringEncoding::UTF8, 255, false, mut_ptr, string.capacity() as i64, &mut used_buf_len)};
         std::mem::forget(string);
         unsafe{ String::from_raw_parts(mut_ptr, used_buf_len as usize, actual_capaicty)}
     }
@@ -56,9 +56,9 @@ impl CFStringRef {
 
 #[link(name="CoreFoundation",kind="framework")]
 extern "C" {
-    fn CFStringCreateWithBytes(alloc: CFAllocatorRef, bytes: *const u8, numBytes: CFIndex, encoding: CFStringEncoding, isExternalRepresentation: bool ) -> CFStringRef;
-    fn CFStringGetBytes(theString: CFStringRef, range: CFRange,  encoding: CFStringEncoding, lossByte: u8, isExternalRepresentation: bool, buffer: *mut u8, maxBufferLen: CFIndex, usedBufLen: *mut CFIndex) -> CFIndex;
-    fn CFStringGetLength(theString: CFStringRef) -> CFIndex;
+    fn CFStringCreateWithBytes(alloc: *const CFAllocatorRef, bytes: *const u8, numBytes: CFIndex, encoding: CFStringEncoding, isExternalRepresentation: bool ) -> *const CFStringRef;
+    fn CFStringGetBytes(theString: *const CFStringRef, range: CFRange,  encoding: CFStringEncoding, lossByte: u8, isExternalRepresentation: bool, buffer: *mut u8, maxBufferLen: CFIndex, usedBufLen: *mut CFIndex) -> CFIndex;
+    fn CFStringGetLength(theString: *const CFStringRef) -> CFIndex;
     fn CFStringGetMaximumSizeForEncoding(length: CFIndex, encoding: CFStringEncoding) -> CFIndex;
 
 }

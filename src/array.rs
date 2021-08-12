@@ -1,13 +1,12 @@
 use std::ffi::c_void;
-use crate::base::{CFTypeRef, CFTypeRefWithBaseType, CFTypeID};
-
-#[derive(Debug,Clone,Copy)]
-pub struct CFArrayRef(*const c_void);
+use crate::base::{CFTypeRef, CFTypeRefWithBaseType, CFTypeID, OpaqueCType};
+#[repr(C)]
+pub struct CFArrayRef(OpaqueCType);
 impl CFTypeRef for CFArrayRef {
     fn as_ptr(&self) -> *const c_void {
-        self.0
+        self as *const _ as *const c_void
     }
-    unsafe fn from_ptr(ptr: *const c_void) -> Self { Self(ptr)}
+    unsafe fn from_ptr(ptr: *const c_void) -> *const Self { ptr as *const Self }
 }
 extern "C" {
     fn CFArrayGetTypeID() -> CFTypeID;
