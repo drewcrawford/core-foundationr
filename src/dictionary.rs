@@ -1,6 +1,6 @@
 use crate::base::{CFType, CFTypeID, CFTypeWithBaseType, CFTypeAny, OpaqueCType};
 use std::ffi::c_void;
-use crate::prelude::*;
+use crate::CFTypeBehavior;
 
 #[repr(C)]
 pub struct CFDictionary(OpaqueCType);
@@ -17,11 +17,19 @@ impl CFTypeWithBaseType for CFDictionary {
 }
 
 impl CFDictionary {
-    pub fn get_with_ptr(&self, key: *const c_void) -> &CFTypeAny {
+    pub fn get_with_ptr(&self, key: *const c_void) -> *const CFTypeAny {
         unsafe{ &*CFDictionaryGetValue(self, key)}
     }
 
-    pub unsafe fn get_with_key<K: CFType>(&self, key: &K) -> &CFTypeAny {
-        self.get_with_ptr(key.as_ptr())
+    pub fn get_with_key<K: CFType>(&self, key: &K) -> Option<&CFTypeAny> {
+        unsafe {
+            let result = self.get_with_ptr(key.as_ptr());
+            if result.is_null() {
+                None
+            }
+            else {
+                Some(&*result)
+            }
+        }
     }
 }

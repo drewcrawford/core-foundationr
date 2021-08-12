@@ -35,11 +35,17 @@ pub trait CFType {
 #[repr(C)]
 pub struct CFString(OpaqueCType);
 impl CFType for CFString {}
+impl CFTypeWithBaseType for CFString {
+    fn type_id() -> CFTypeID {
+        unsafe {CFStringGetTypeID()}
+    }
+}
 
 extern "C" {
     //*c_void in here is basically CFTypeRef (which is a trait in Rust)
     fn CFCopyDescription(cf: *const c_void) -> *const CFString;
     fn CFGetTypeID(cf: *const c_void ) -> CFTypeID;
+    fn CFStringGetTypeID() -> CFTypeID;
 }
 
 pub trait CFTypeBehavior {

@@ -18,7 +18,7 @@ impl CFData {
 }
 
 #[test] fn from_str() {
-    use crate::prelude::*;
+    use crate::CFTypeBehavior;
     let result = CFData::from_str("hello world");
     let str = result.description().as_string();
     assert!(str.starts_with("<CFData"))

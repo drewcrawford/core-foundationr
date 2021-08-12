@@ -13,7 +13,6 @@ pub use base::CFString;
 pub use property_list::{MutabilityOptions,Format};
 pub use data::CFData;
 pub use property_list::CFPropertyList;
-
-mod prelude {
-    pub use super::base::CFTypeBehavior;
-}
+pub use base::CFTypeBehavior;
+pub use dictionary::CFDictionary;
+pub use array::CFArray;

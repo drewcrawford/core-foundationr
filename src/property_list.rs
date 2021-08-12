@@ -2,11 +2,7 @@ use crate::base::{CFType, CFOptionFlags, CFAllocator, CFIndex, OpaqueCType};
 use crate::data::CFData;
 use crate::error::CFError;
 use crate::cell::StrongCell;
-use crate::dictionary::CFDictionary;
-use crate::CFString;
-use crate::array::CFArray;
-use crate::prelude::*;
-
+use crate::CFTypeBehavior;
 #[repr(transparent)]
 pub struct MutabilityOptions(CFOptionFlags);
 #[allow(non_upper_case_globals)]
@@ -48,7 +44,8 @@ extern "C" {
 }
 
 #[test] fn parse() {
-    use crate::prelude::*;
+    use crate::{CFTypeBehavior,CFDictionary,CFString,CFArray};
+
     let str = r#"<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
@@ -98,7 +95,14 @@ extern "C" {
     println!("Dictionary {:?}",dictionary);
     let strong_str = CFString::from_str("system-entities");
     let borrow: &CFString = &strong_str;
-    let system_entities = unsafe{ dictionary.get_with_key(borrow)};
-    let array: &CFArray = system_entities.checked_cast();
+    let system_entities = dictionary.get_with_key(borrow);
+    let array: &CFArray = system_entities.unwrap().checked_cast();
     println!("Array {:?}",array.description().as_string());
+
+    let r = array.iter().find_map(|p| {
+        let d: &CFDictionary = p.checked_cast();
+        d.get_with_key(&*CFString::from_str("mount-point"))
+    });
+    let str_mount_point: &CFString = r.unwrap().checked_cast();
+    assert_eq!(str_mount_point.as_string(), "/Volumes/macOS Developer Beta Access Utility");
 }
