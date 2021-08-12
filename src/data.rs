@@ -1,5 +1,4 @@
 use crate::base::{CFTypeRef, CFAllocatorRef, CFIndex, OpaqueCType};
-use std::ffi::c_void;
 use crate::cell::StrongCell;
 
 extern "C" {
@@ -8,13 +7,7 @@ extern "C" {
 
 #[repr(C)]
 pub struct CFDataRef(OpaqueCType);
-impl CFTypeRef for CFDataRef {
-
-    fn as_ptr(&self) -> *const c_void {
-        self as *const Self as *const c_void
-    }
-    unsafe fn from_ptr(ptr: *const c_void) -> *const Self { ptr as *const Self }
-}
+impl CFTypeRef for CFDataRef {}
 impl CFDataRef {
     //- note: objc knows a faster path for owned strings
     //- note: uncertain about faster path for static strings?

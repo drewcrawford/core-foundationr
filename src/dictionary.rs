@@ -1,14 +1,10 @@
 use crate::base::{CFTypeRef, CFTypeID, CFTypeRefWithBaseType, CFTypeRefAny, OpaqueCType};
 use std::ffi::c_void;
+use crate::prelude::*;
 
 #[repr(C)]
 pub struct CFDictionaryRef(OpaqueCType);
-impl CFTypeRef for CFDictionaryRef {
-    fn as_ptr(&self) -> *const c_void {
-        self as *const _ as *const c_void
-    }
-    unsafe fn from_ptr(ptr: *const c_void) -> *const Self { ptr as *const Self }
-}
+impl CFTypeRef for CFDictionaryRef {}
 extern "C" {
     fn CFDictionaryGetTypeID() -> CFTypeID;
     fn CFDictionaryGetValue(theDict: *const CFDictionaryRef, key: *const c_void) -> *const CFTypeRefAny;

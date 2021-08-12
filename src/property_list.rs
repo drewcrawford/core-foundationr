@@ -1,4 +1,3 @@
-use std::ffi::c_void;
 use crate::base::{CFTypeRef, CFOptionFlags, CFAllocatorRef, CFIndex, OpaqueCType};
 use crate::data::CFDataRef;
 use crate::error::CFErrorRef;
@@ -6,6 +5,7 @@ use crate::cell::StrongCell;
 use crate::dictionary::CFDictionaryRef;
 use crate::CFStringRef;
 use crate::array::CFArrayRef;
+use crate::prelude::*;
 
 #[repr(transparent)]
 pub struct MutabilityOptions(CFOptionFlags);
@@ -27,12 +27,7 @@ impl Format {
 
 #[repr(C)]
 pub struct CFPropertyListRef(OpaqueCType);
-impl CFTypeRef for CFPropertyListRef {
-    fn as_ptr(&self) -> *const c_void {
-        self as *const _ as *const c_void
-    }
-    unsafe fn from_ptr(ptr: *const c_void) -> *const Self { ptr as *const Self }
-}
+impl CFTypeRef for CFPropertyListRef {}
 
 impl CFPropertyListRef {
     pub fn from_data(data: &CFDataRef) -> Result<StrongCell<CFPropertyListRef>,*const CFErrorRef> {
