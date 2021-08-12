@@ -16,6 +16,7 @@ pub type CFTypeID = c_ulong;
 /// be constructed, because we don't use 'owned' values of these types.
 #[repr(C)]
 pub(crate) struct OpaqueCType {
+    //bool has alignment 1
     _field: bool
 }
 
@@ -25,12 +26,11 @@ pub struct CFRange {
     pub length: CFIndex
 }
 
-///We choose to represent CFTypeRef as a trait.
+///We choose to represent `CFType`` as a trait.
 ///
 /// See also:
-/// * CFTypeRefAny - struct with no associated type
-pub trait CFType {
-}
+/// * [CFTypeAny] - concrete type, models a pointer to "any" type
+pub trait CFType {}
 
 #[repr(C)]
 pub struct CFString(OpaqueCType);
@@ -49,9 +49,14 @@ extern "C" {
 }
 
 pub trait CFTypeBehavior {
+    ///Returns a (strong) pointer to the description
     fn description(&self) -> StrongCell<CFString>;
+    ///Finds the CoreFoundation type id
     fn type_id(&self) -> CFTypeID;
+    ///Perform a checked cast to some other type.  The returned pointer
+    /// has the same lifetime as the current pointer.
     fn checked_cast<R: CFTypeWithBaseType>(&self) -> &R;
+    ///Erase to a raw pointer
     fn as_ptr(&self) -> *const c_void;
     ///Create a type from a raw pointer
     ///
@@ -62,7 +67,7 @@ pub trait CFTypeBehavior {
     /// If you fail, 'safe' functions involving this return type may have UB, which is very scary.
     ///
     /// If you do not know what you're doing, put the return value into a [StrongCell] right away to
-    /// promote to the `'static` lifetime.  Such use should be safe, at some additional performance cost.
+    /// promote to the `'static` (e.g. runtime managed) lifetime.  Such use should be safe, at some additional performance cost.
     unsafe fn from_ptr(ptr: *const c_void) -> *const Self;
 }
 impl<T: CFType> CFTypeBehavior for T {
@@ -94,6 +99,7 @@ pub trait CFTypeWithBaseType: CFType {
     fn type_id() -> CFTypeID;
 }
 
+///Represents 'any' CFTypeRef, with the actual type erased.
 #[repr(C)]
 pub struct CFTypeAny(OpaqueCType);
 impl CFType for CFTypeAny {}
@@ -101,6 +107,7 @@ impl CFType for CFTypeAny {}
 #[repr(C)]
 pub struct CFAllocator(OpaqueCType);
 impl CFAllocator {
+    ///note: CFAllocator is often null, so cannot be legally implemented with a reference
     pub fn null() -> *const CFAllocator { std::ptr::null() as *const CFAllocator }
 }
 

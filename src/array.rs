@@ -1,4 +1,7 @@
+//!<CoreFoundation/CFArray.h>
+
 use crate::base::{CFType, CFTypeWithBaseType, CFTypeID, OpaqueCType, CFIndex, CFTypeAny};
+
 #[repr(C)]
 pub struct CFArray(OpaqueCType);
 impl CFType for CFArray {}
@@ -18,8 +21,9 @@ impl CFArray {
     unsafe fn get_unchecked(&self, index: CFIndex) -> &CFTypeAny {
         &*CFArrayGetValueAtIndex(self, index)
     }
+    ///Return an iterator over the array elements, which may be of any type ([CFTypeAny])
     pub fn iter(&self) -> impl Iterator<Item=&CFTypeAny> {
-        CFArrayRefIterator {
+        CFArrayIterator {
             array_ref: self,
             current_index: 0,
             last_index: unsafe{ CFArrayGetCount(self)}
@@ -27,13 +31,13 @@ impl CFArray {
     }
 }
 
-
-struct CFArrayRefIterator<'a> {
+///Iterator type for CFArray
+struct CFArrayIterator<'a> {
     array_ref: &'a CFArray,
     current_index: CFIndex,
     last_index: CFIndex
 }
-impl<'a> Iterator for CFArrayRefIterator<'a> {
+impl<'a> Iterator for CFArrayIterator<'a> {
     type Item = &'a CFTypeAny;
 
     fn next(&mut self) -> Option<Self::Item> {

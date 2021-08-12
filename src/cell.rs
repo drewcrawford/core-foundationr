@@ -3,8 +3,14 @@ use std::ffi::c_void;
 use std::ops::Deref;
 use std::fmt::Formatter;
 
+///A 'smart pointer' that keeps a strong reference to the CF object.
+///
+/// The object will be released when the `StrongCell` is dropped.
 pub struct StrongCell<T: CFType>(*const T);
 impl<T: CFType> StrongCell<T> {
+    ///Creates a [StrongCell], assuming the pointer is retained already (so the conversion is a no-op).
+    ///
+    ///This is unsafe, because there's no way to check if it's retained or even valid
     pub unsafe fn assuming_retained(t: *const T) -> Self {
         Self(t as *const T)
     }

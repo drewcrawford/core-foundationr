@@ -9,8 +9,8 @@ extern "C" {
 pub struct CFData(OpaqueCType);
 impl CFType for CFData {}
 impl CFData {
-    //- note: objc knows a faster path for owned strings
-    //- note: uncertain about faster path for static strings?
+    ///- note: objc knows a faster path for owned strings
+    ///- note: uncertain about faster path for static strings?
     pub fn from_str(str: &str) -> StrongCell<CFData> {
         let raw = unsafe{ CFDataCreate(CFAllocator::null(), str.as_ptr(), str.as_bytes().len() as CFIndex) };
         unsafe{ StrongCell::assuming_retained(raw) }

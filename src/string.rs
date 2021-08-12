@@ -32,6 +32,7 @@ impl CFString {
             StrongCell::assuming_retained(raw)
         }
     }
+    ///Returns the length of the string, see cocoa docs for `CFStringGetLength`.
     pub fn length(&self) -> CFIndex {
         unsafe { CFStringGetLength(self)}
     }
