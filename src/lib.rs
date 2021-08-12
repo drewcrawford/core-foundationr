@@ -9,11 +9,11 @@ mod array;
 
 
 pub use string::CFStringEncoding;
-pub use base::CFStringRef;
+pub use base::CFString;
 pub use property_list::{MutabilityOptions,Format};
-pub use data::CFDataRef;
-pub use property_list::CFPropertyListRef;
+pub use data::CFData;
+pub use property_list::CFPropertyList;
 
 mod prelude {
-    pub use super::base::CFTypeRefBehavior;
+    pub use super::base::CFTypeBehavior;
 }

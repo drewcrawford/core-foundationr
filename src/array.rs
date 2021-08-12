@@ -1,11 +1,11 @@
-use crate::base::{CFTypeRef, CFTypeRefWithBaseType, CFTypeID, OpaqueCType};
+use crate::base::{CFType, CFTypeWithBaseType, CFTypeID, OpaqueCType};
 #[repr(C)]
-pub struct CFArrayRef(OpaqueCType);
-impl CFTypeRef for CFArrayRef {}
+pub struct CFArray(OpaqueCType);
+impl CFType for CFArray {}
 extern "C" {
     fn CFArrayGetTypeID() -> CFTypeID;
 }
-impl CFTypeRefWithBaseType for CFArrayRef {
+impl CFTypeWithBaseType for CFArray {
     fn type_id() -> CFTypeID {
         unsafe { CFArrayGetTypeID() }
     }

@@ -29,23 +29,23 @@ pub struct CFRange {
 ///
 /// See also:
 /// * CFTypeRefAny - struct with no associated type
-pub trait CFTypeRef {
+pub trait CFType {
 }
 
 #[repr(C)]
-pub struct CFStringRef(OpaqueCType);
-impl CFTypeRef for CFStringRef {}
+pub struct CFString(OpaqueCType);
+impl CFType for CFString {}
 
 extern "C" {
     //*c_void in here is basically CFTypeRef (which is a trait in Rust)
-    fn CFCopyDescription(cf: *const c_void) -> *const CFStringRef;
+    fn CFCopyDescription(cf: *const c_void) -> *const CFString;
     fn CFGetTypeID(cf: *const c_void ) -> CFTypeID;
 }
 
-pub trait CFTypeRefBehavior {
-    fn description(&self) -> StrongCell<CFStringRef>;
+pub trait CFTypeBehavior {
+    fn description(&self) -> StrongCell<CFString>;
     fn type_id(&self) -> CFTypeID;
-    fn checked_cast<R: CFTypeRefWithBaseType>(&self) -> &R;
+    fn checked_cast<R: CFTypeWithBaseType>(&self) -> &R;
     fn as_ptr(&self) -> *const c_void;
     ///Create a type from a raw pointer
     ///
@@ -59,8 +59,8 @@ pub trait CFTypeRefBehavior {
     /// promote to the `'static` lifetime.  Such use should be safe, at some additional performance cost.
     unsafe fn from_ptr(ptr: *const c_void) -> *const Self;
 }
-impl<T: CFTypeRef> CFTypeRefBehavior for T {
-    fn description(&self) -> StrongCell<CFStringRef> {
+impl<T: CFType> CFTypeBehavior for T {
+    fn description(&self) -> StrongCell<CFString> {
         let r1 = self.as_ptr();
         let raw = unsafe{ CFCopyDescription(r1) };
         unsafe{ StrongCell::assuming_retained(&*raw) }
@@ -69,8 +69,8 @@ impl<T: CFTypeRef> CFTypeRefBehavior for T {
         unsafe { CFGetTypeID(self.as_ptr()) }
     }
 
-    fn checked_cast<R: CFTypeRefWithBaseType>(&self) -> &R {
-        assert_eq!(CFTypeRefBehavior::type_id(self),R::type_id());
+    fn checked_cast<R: CFTypeWithBaseType>(&self) -> &R {
+        assert_eq!(CFTypeBehavior::type_id(self), R::type_id());
         unsafe{ &*R::from_ptr(self.as_ptr()) }
     }
 
@@ -84,18 +84,18 @@ impl<T: CFTypeRef> CFTypeRefBehavior for T {
 }
 
 ///These are types that have a "base type" (e.g. not polymorphic over underlying types).
-pub trait CFTypeRefWithBaseType: CFTypeRef {
+pub trait CFTypeWithBaseType: CFType {
     fn type_id() -> CFTypeID;
 }
 
 #[repr(C)]
-pub struct CFTypeRefAny(OpaqueCType);
-impl CFTypeRef for CFTypeRefAny {}
+pub struct CFTypeAny(OpaqueCType);
+impl CFType for CFTypeAny {}
 
 #[repr(C)]
-pub struct CFAllocatorRef(OpaqueCType);
-impl CFAllocatorRef {
-    pub fn null() -> *const CFAllocatorRef { std::ptr::null() as *const CFAllocatorRef }
+pub struct CFAllocator(OpaqueCType);
+impl CFAllocator {
+    pub fn null() -> *const CFAllocator { std::ptr::null() as *const CFAllocator }
 }
 
 pub type CFIndex = c_long;

@@ -1,10 +1,10 @@
-use crate::base::{CFTypeRef, CFOptionFlags, CFAllocatorRef, CFIndex, OpaqueCType};
-use crate::data::CFDataRef;
-use crate::error::CFErrorRef;
+use crate::base::{CFType, CFOptionFlags, CFAllocator, CFIndex, OpaqueCType};
+use crate::data::CFData;
+use crate::error::CFError;
 use crate::cell::StrongCell;
-use crate::dictionary::CFDictionaryRef;
-use crate::CFStringRef;
-use crate::array::CFArrayRef;
+use crate::dictionary::CFDictionary;
+use crate::CFString;
+use crate::array::CFArray;
 use crate::prelude::*;
 
 #[repr(transparent)]
@@ -26,13 +26,13 @@ impl Format {
 }
 
 #[repr(C)]
-pub struct CFPropertyListRef(OpaqueCType);
-impl CFTypeRef for CFPropertyListRef {}
+pub struct CFPropertyList(OpaqueCType);
+impl CFType for CFPropertyList {}
 
-impl CFPropertyListRef {
-    pub fn from_data(data: &CFDataRef) -> Result<StrongCell<CFPropertyListRef>,*const CFErrorRef> {
-        let mut err = unsafe{ CFErrorRef::from_ptr(std::ptr::null())};
-        let o = unsafe{ CFPropertyListCreateWithData(CFAllocatorRef::null(), data, MutabilityOptions::Immutable, std::ptr::null_mut(), &mut err)};
+impl CFPropertyList {
+    pub fn from_data(data: &CFData) -> Result<StrongCell<CFPropertyList>,*const CFError> {
+        let mut err = unsafe{ CFError::from_ptr(std::ptr::null())};
+        let o = unsafe{ CFPropertyListCreateWithData(CFAllocator::null(), data, MutabilityOptions::Immutable, std::ptr::null_mut(), &mut err)};
         if !err.is_null() {
             Err(err)
         }
@@ -43,7 +43,7 @@ impl CFPropertyListRef {
 }
 
 extern "C" {
-    fn CFPropertyListCreateWithData(allocator: *const CFAllocatorRef, data: *const CFDataRef , options: MutabilityOptions, format: *mut Format, error: *mut *const CFErrorRef) -> *const CFPropertyListRef;
+    fn CFPropertyListCreateWithData(allocator: *const CFAllocator, data: *const CFData, options: MutabilityOptions, format: *mut Format, error: *mut *const CFError) -> *const CFPropertyList;
 
 }
 
@@ -91,14 +91,14 @@ extern "C" {
 	</array>
 </dict>
 </plist>"#;
-    let data = CFDataRef::from_str(str);
-    let property_list = CFPropertyListRef::from_data(&data).unwrap();
+    let data = CFData::from_str(str);
+    let property_list = CFPropertyList::from_data(&data).unwrap();
     println!("Parsed list {:?}",property_list.description().as_string());
-    let dictionary: StrongCell<CFDictionaryRef> = property_list.cast_checked();
+    let dictionary: StrongCell<CFDictionary> = property_list.cast_checked();
     println!("Dictionary {:?}",dictionary);
-    let strong_str = CFStringRef::from_str("system-entities");
-    let borrow: &CFStringRef = &strong_str;
+    let strong_str = CFString::from_str("system-entities");
+    let borrow: &CFString = &strong_str;
     let system_entities = unsafe{ dictionary.get_with_key(borrow)};
-    let array: &CFArrayRef = system_entities.checked_cast();
+    let array: &CFArray = system_entities.checked_cast();
     println!("Array {:?}",array.description().as_string());
 }

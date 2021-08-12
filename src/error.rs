@@ -1,5 +1,5 @@
-use crate::base::{CFTypeRef, OpaqueCType};
+use crate::base::{CFType, OpaqueCType};
 
 #[repr(C)]
-pub struct CFErrorRef(OpaqueCType);
-impl CFTypeRef for CFErrorRef {}
+pub struct CFError(OpaqueCType);
+impl CFType for CFError {}

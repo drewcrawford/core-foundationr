@@ -1,4 +1,4 @@
-use crate::base::{CFStringRef, CFAllocatorRef, CFIndex, CFRange};
+use crate::base::{CFString, CFAllocator, CFIndex, CFRange};
 use crate::cell::StrongCell;
 
 #[repr(transparent)]
@@ -23,12 +23,12 @@ impl CFStringEncoding {
     pub const UTF32LE: CFStringEncoding = CFStringEncoding(0x1c000100);
 }
 
-impl CFStringRef {
+impl CFString {
     ///note: objc knows a faster way for static strings
     ///note: objc knows a faster way for owned strings
-    pub fn from_str(str: &str) -> StrongCell<CFStringRef> {
+    pub fn from_str(str: &str) -> StrongCell<CFString> {
         unsafe{
-            let raw = CFStringCreateWithBytes(CFAllocatorRef::null(), str.as_ptr(), str.as_bytes().len() as CFIndex, CFStringEncoding::UTF8, false);
+            let raw = CFStringCreateWithBytes(CFAllocator::null(), str.as_ptr(), str.as_bytes().len() as CFIndex, CFStringEncoding::UTF8, false);
             StrongCell::assuming_retained(raw)
         }
     }
@@ -56,16 +56,16 @@ impl CFStringRef {
 
 #[link(name="CoreFoundation",kind="framework")]
 extern "C" {
-    fn CFStringCreateWithBytes(alloc: *const CFAllocatorRef, bytes: *const u8, numBytes: CFIndex, encoding: CFStringEncoding, isExternalRepresentation: bool ) -> *const CFStringRef;
-    fn CFStringGetBytes(theString: *const CFStringRef, range: CFRange,  encoding: CFStringEncoding, lossByte: u8, isExternalRepresentation: bool, buffer: *mut u8, maxBufferLen: CFIndex, usedBufLen: *mut CFIndex) -> CFIndex;
-    fn CFStringGetLength(theString: *const CFStringRef) -> CFIndex;
+    fn CFStringCreateWithBytes(alloc: *const CFAllocator, bytes: *const u8, numBytes: CFIndex, encoding: CFStringEncoding, isExternalRepresentation: bool ) -> *const CFString;
+    fn CFStringGetBytes(theString: *const CFString, range: CFRange, encoding: CFStringEncoding, lossByte: u8, isExternalRepresentation: bool, buffer: *mut u8, maxBufferLen: CFIndex, usedBufLen: *mut CFIndex) -> CFIndex;
+    fn CFStringGetLength(theString: *const CFString) -> CFIndex;
     fn CFStringGetMaximumSizeForEncoding(length: CFIndex, encoding: CFStringEncoding) -> CFIndex;
 
 }
 
 #[test] fn create_string() {
 
-    let string = CFStringRef::from_str("test");
+    let string = CFString::from_str("test");
     println!("cf {:?}",string);
     println!("roundtrip {:?}",string.as_string());
 
