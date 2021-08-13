@@ -27,11 +27,11 @@ impl CFType for CFPropertyList {}
 
 impl CFPropertyList {
     ///Create a property list from the given data.  See cocoa docs for `CFPropertyListCreateWithData`.
-    pub fn from_data(data: &CFData) -> Result<StrongCell<CFPropertyList>,*const CFError> {
+    pub fn from_data(data: &CFData) -> Result<StrongCell<CFPropertyList>, StrongCell<CFError>> {
         let mut err = unsafe{ CFError::from_ptr(std::ptr::null())};
         let o = unsafe{ CFPropertyListCreateWithData(CFAllocator::null(), data, MutabilityOptions::Immutable, std::ptr::null_mut(), &mut err)};
         if !err.is_null() {
-            Err(err)
+            Err(unsafe{ StrongCell::assuming_retained(err) })
         }
         else {
             Ok(unsafe{ StrongCell::assuming_retained(o)})

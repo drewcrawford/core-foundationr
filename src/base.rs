@@ -17,7 +17,8 @@ pub type CFTypeID = c_ulong;
 #[repr(C)]
 pub(crate) struct OpaqueCType {
     //bool has alignment 1
-    _field: bool
+    _field: c_void
+
 }
 
 #[repr(C)]
@@ -60,6 +61,8 @@ pub trait CFTypeBehavior {
     fn as_ptr(&self) -> *const c_void;
     ///Create a type from a raw pointer
     ///
+    /// See also: [from_ref]
+    ///
     /// # Safety
     /// **WARNING**.  The value returned from this function is only valid for the lifetime of the corresponding objc reference.
     /// This invariant is **not** enforced by the Rust borrow checker.  Ergo, you must enforce it.
@@ -69,6 +72,20 @@ pub trait CFTypeBehavior {
     /// If you do not know what you're doing, put the return value into a [StrongCell] right away to
     /// promote to the `'static` (e.g. runtime managed) lifetime.  Such use should be safe, at some additional performance cost.
     unsafe fn from_ptr(ptr: *const c_void) -> *const Self;
+
+    ///Create a type from a reference
+    ///
+    /// See also: [from_ptr]
+    ///
+    /// **WARNING**.  The value returned from this function is only valid for the lifetime of the corresponding objc reference.
+    /// This invariant is **partially** enforced by the Rust borrow checker, in that the lifetime is derived from the passed value.
+    ///
+    /// However, objc may release the object on its own if you're not careful.  If so 'safe' functions
+    /// involving this return type may have UB, which is very scary.
+    ///
+    /// If you do not know what you're doing, put the return value into a [StrongCell] right away to
+    /// promote to the `'static` (e.g. runtime managed) lifetime.  Such use should be safe, at some additional performance cost.
+    unsafe fn from_ref(reference: &c_void) -> &Self;
 }
 impl<T: CFType> CFTypeBehavior for T {
     fn description(&self) -> StrongCell<CFString> {
@@ -91,6 +108,9 @@ impl<T: CFType> CFTypeBehavior for T {
 
     unsafe fn from_ptr(ptr: *const c_void) -> *const Self {
         ptr as *const Self
+    }
+    unsafe fn from_ref(reference: &c_void) -> &Self {
+         &*(reference as *const c_void as *const Self)
     }
 }
 
