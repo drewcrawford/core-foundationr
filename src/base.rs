@@ -61,7 +61,7 @@ pub trait CFTypeBehavior {
     fn as_ptr(&self) -> *const c_void;
     ///Create a type from a raw pointer
     ///
-    /// See also: [from_ref]
+    /// See also: [Self::from_ref]
     ///
     /// # Safety
     /// **WARNING**.  The value returned from this function is only valid for the lifetime of the corresponding objc reference.
@@ -75,7 +75,7 @@ pub trait CFTypeBehavior {
 
     ///Create a type from a reference
     ///
-    /// See also: [from_ptr]
+    /// See also: [Self::from_ptr]
     ///
     /// **WARNING**.  The value returned from this function is only valid for the lifetime of the corresponding objc reference.
     /// This invariant is **partially** enforced by the Rust borrow checker, in that the lifetime is derived from the passed value.
