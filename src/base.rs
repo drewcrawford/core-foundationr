@@ -15,6 +15,7 @@ pub type CFTypeID = c_ulong;
 /// Instead, we need to give them some non-ZST payload.  Note that this should never actually
 /// be constructed, because we don't use 'owned' values of these types.
 #[repr(C)]
+#[derive(Debug)]
 pub(crate) struct OpaqueCType {
     //bool has alignment 1
     _field: c_void
