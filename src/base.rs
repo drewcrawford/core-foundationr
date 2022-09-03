@@ -92,7 +92,7 @@ impl<T: CFType> CFTypeBehavior for T {
     fn description(&self) -> StrongCell<CFString> {
         let r1 = self.as_ptr();
         let raw = unsafe{ CFCopyDescription(r1) };
-        unsafe{ StrongCell::assuming_retained(&*raw) }
+        unsafe{ StrongCell::assuming_retained_nonnull(raw) }
     }
     fn type_id(&self) -> CFTypeID {
         unsafe { CFGetTypeID(self.as_ptr()) }

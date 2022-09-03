@@ -29,7 +29,7 @@ impl CFString {
     pub fn from_str(str: &str) -> StrongCell<CFString> {
         unsafe{
             let raw = CFStringCreateWithBytes(CFAllocator::null(), str.as_ptr(), str.as_bytes().len() as CFIndex, CFStringEncoding::UTF8, false);
-            StrongCell::assuming_retained(raw)
+            StrongCell::assuming_retained_nonnull(raw)
         }
     }
     ///Returns the length of the string, see cocoa docs for `CFStringGetLength`.

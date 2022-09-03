@@ -31,10 +31,10 @@ impl CFPropertyList {
         let mut err = unsafe{ CFError::from_ptr(std::ptr::null())};
         let o = unsafe{ CFPropertyListCreateWithData(CFAllocator::null(), data, MutabilityOptions::Immutable, std::ptr::null_mut(), &mut err)};
         if !err.is_null() {
-            Err(unsafe{ StrongCell::assuming_retained(err) })
+            Err(unsafe{ StrongCell::assuming_retained_nonnull(err) })
         }
         else {
-            Ok(unsafe{ StrongCell::assuming_retained(o)})
+            Ok(unsafe{ StrongCell::assuming_retained_nonnull(o)})
         }
     }
 }

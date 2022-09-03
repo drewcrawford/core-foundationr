@@ -18,7 +18,7 @@ impl std::fmt::Display for CFError {
         unsafe {
             let description = CFErrorCopyDescription(self);
             //documented to never be null.
-            let description_ref = StrongCell::assuming_retained(description);
+            let description_ref = StrongCell::assuming_retained_nonnull(description);
             //todo: could potentially be optimized with an internal pointer perhaps
             f.write_fmt(format_args!("{}",description_ref.as_string()))
         }
@@ -41,7 +41,7 @@ impl std::error::Error for CFError {}
         unsafe {
             let domain = CFString::from_str("test");
             let error = CFErrorCreate(std::ptr::null(), &*domain, 0,std::ptr::null());
-            let error_ref = StrongCell::assuming_retained(error);
+            let error_ref = StrongCell::assuming_retained_nonnull(error);
             let error = format!("{}",error_ref.deref());
             println!("{}",error);
             assert_eq!(error,"The operation couldn’t be completed. (test error 0.)")
