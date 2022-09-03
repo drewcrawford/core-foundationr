@@ -15,11 +15,23 @@ impl CFData {
         let raw = unsafe{ CFDataCreate(CFAllocator::null(), str.as_ptr(), str.as_bytes().len() as CFIndex) };
         unsafe{ StrongCell::assuming_retained(raw) }
     }
+    ///Copies the provided slice into the CFData.
+    pub fn copy_slice(slice: &[u8]) -> StrongCell<CFData> {
+        let raw = unsafe { CFDataCreate(CFAllocator::null(), slice.as_ptr(), slice.len().try_into().unwrap()) };
+        unsafe { StrongCell::assuming_retained(raw) }
+    }
 }
 
 #[test] fn from_str() {
     use crate::CFTypeBehavior;
     let result = CFData::from_str("hello world");
+    let str = result.description().as_string();
+    assert!(str.starts_with("<CFData"))
+}
+
+#[test] fn copy_slice() {
+    use crate::CFTypeBehavior;
+    let result = CFData::copy_slice(b"hello world");
     let str = result.description().as_string();
     assert!(str.starts_with("<CFData"))
 }
