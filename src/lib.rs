@@ -1,5 +1,7 @@
 /*! # Drew's core-foundation bindings for Rust
 
+![art](../../../art/logo.png)
+
 Provides Rust bindings for Apple Core Foundation.  This crate may be compared to
 * [CoreFoundation-sys](https://crates.io/crates/CoreFoundation-sys)
 * [core-foundation-sys](https://crates.io/crates/core-foundation-sys)
@@ -67,5 +69,5 @@ pub use property_list::CFPropertyList;
 pub use base::CFTypeBehavior;
 pub use dictionary::CFDictionary;
 pub use array::CFArray;
-pub use error::CFError;
+pub use error::*;
 pub use cell::StrongCell;

@@ -1,6 +1,5 @@
 use std::fmt::{Formatter};
-use std::ops::Deref;
-use crate::base::{CFIndex, CFType, OpaqueCType};
+use crate::base::{CFType, OpaqueCType};
 use crate::{CFString, StrongCell};
 
 #[repr(C)]
@@ -26,20 +25,26 @@ impl std::fmt::Display for CFError {
     }
 }
 impl std::error::Error for CFError {}
+#[cfg(test)] mod tests {
+    use std::ops::Deref;
+    use crate::base::CFIndex;
+    use crate::{CFError, CFString, StrongCell};
+    use crate::error::CFErrorDomain;
 
-#[test] fn description() {
-    use std::ffi::c_void;
+    #[test] fn description() {
+        use std::ffi::c_void;
 
-    extern "C" {
-        fn CFErrorCreate(allocator: *const c_void, domain: *const CFErrorDomain, code: CFIndex, user_info: *const c_void) -> *const CFError;
-    }
+        extern "C" {
+            fn CFErrorCreate(allocator: *const c_void, domain: *const CFErrorDomain, code: CFIndex, user_info: *const c_void) -> *const CFError;
+        }
 
-    unsafe {
-        let domain = CFString::from_str("test");
-        let error = CFErrorCreate(std::ptr::null(), &*domain, 0,std::ptr::null());
-        let error_ref = StrongCell::assuming_retained(error);
-        let error = format!("{}",error_ref.deref());
-        println!("{}",error);
-        assert_eq!(error,"The operation couldn’t be completed. (test error 0.)")
+        unsafe {
+            let domain = CFString::from_str("test");
+            let error = CFErrorCreate(std::ptr::null(), &*domain, 0,std::ptr::null());
+            let error_ref = StrongCell::assuming_retained(error);
+            let error = format!("{}",error_ref.deref());
+            println!("{}",error);
+            assert_eq!(error,"The operation couldn’t be completed. (test error 0.)")
+        }
     }
 }
