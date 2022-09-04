@@ -1,12 +1,15 @@
 use crate::base::{CFType, CFTypeWithBaseType, CFTypeBehavior, CFTypeAny};
 use std::ffi::c_void;
-use std::ops::Deref;
-use std::fmt::Formatter;
+use std::ops::{Deref, DerefMut};
+use std::fmt::{Debug, Display, Formatter};
+use std::mem::forget;
 use std::ptr::NonNull;
 
 ///A 'smart pointer' that keeps a strong reference to the CF object.
 ///
 /// The object will be released when the `StrongCell` is dropped.
+///
+/// For a mutable version see [StrongMutCell].
 pub struct StrongCell<T: CFType>(NonNull<T>);
 impl<T: CFType> StrongCell<T> {
     ///Creates a [StrongCell], assuming the pointer is retained already (so the conversion is a no-op) and non-null.
@@ -26,6 +29,18 @@ impl<T: CFType> StrongCell<T> {
         let new_cell = unsafe{ StrongCell::assuming_retained_nonnull(new_type)};
         std::mem::forget(self);
         new_cell
+    }
+    /**
+    Casts to mutable type.
+
+    # Safety
+    The object must be mutable, "whatever that means".  You are also guaranteeing that nobody
+    else is has a mutable reference to the object.
+    */
+    pub unsafe fn assuming_mut(self) -> StrongMutCell<T> {
+        let s = StrongMutCell(self.0);
+        forget(self);
+        s
     }
 }
 impl<T: CFType> std::fmt::Debug for StrongCell<T> {
@@ -55,5 +70,44 @@ impl<T: CFType> Deref for StrongCell<T> {
 
     fn deref(&self) -> &Self::Target {
         unsafe{ &*self.0.as_ptr() }
+    }
+}
+
+/**
+Like [StrongCell], but mutable.
+
+To create one, see [StrongCell::assuming_mut].
+*/
+pub struct StrongMutCell<T: CFType>(NonNull<T>);
+
+impl<T: CFType> Debug for StrongMutCell<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        f.write_fmt(format_args!("StrongMutCell<{}>({:?})",stringify!(CFError),self.0))
+    }
+}
+impl<T: CFType + Display> Display for StrongMutCell<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        //I think this is fine because of the precedent in Drop.
+        let as_ref = unsafe {&*self.0.as_ptr()};
+        f.write_fmt(format_args!("{}",as_ref))
+    }
+}
+
+impl<T: CFType> Drop for StrongMutCell<T> {
+    fn drop(&mut self) {
+        unsafe{ CFRelease(self.0.as_ptr() as *const c_void) };
+    }
+}
+
+impl<T: CFType> Deref for StrongMutCell<T> {
+    type Target = T;
+
+    fn deref(&self) -> &Self::Target {
+        unsafe{ &*self.0.as_ptr() }
+    }
+}
+impl<T: CFType> DerefMut for StrongMutCell<T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        unsafe{ &mut *self.0.as_ptr() }
     }
 }
