@@ -31,6 +31,16 @@ impl<T: CFType> StrongCell<T> {
         new_cell
     }
     /**
+    Retains the passed pointer.
+
+    # Safety
+    Assumes the pointer is non-null.
+    */
+    pub unsafe fn retain_assuming_nonnull(t: *const T) -> Self {
+        CFRetain(t as *const c_void);
+        Self(NonNull::new_unchecked(t as *mut T))
+    }
+    /**
     Casts to mutable type.
 
     # Safety
@@ -58,6 +68,7 @@ impl <T: std::fmt::Display + CFType> std::fmt::Display for StrongCell<T> {
 
 extern "C" {
     fn CFRelease(type_ref: *const c_void);
+    fn CFRetain(type_ref: *const c_void);
 }
 
 impl<T: CFType> Drop for StrongCell<T> {
