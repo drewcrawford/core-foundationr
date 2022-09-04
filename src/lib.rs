@@ -70,4 +70,4 @@ pub use base::CFTypeBehavior;
 pub use dictionary::CFDictionary;
 pub use array::CFArray;
 pub use error::*;
-pub use cell::StrongCell;
+pub use cell::*;
