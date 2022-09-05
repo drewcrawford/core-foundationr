@@ -1,3 +1,4 @@
+use std::fmt::{Debug, Display};
 use crate::base::{CFString, CFAllocator, CFIndex, CFRange};
 use crate::cell::StrongCell;
 
@@ -51,6 +52,16 @@ impl CFString {
         unsafe{ CFStringGetBytes(self, range, CFStringEncoding::UTF8, 255, false, mut_ptr, string.capacity() as i64, &mut used_buf_len)};
         std::mem::forget(string);
         unsafe{ String::from_raw_parts(mut_ptr, used_buf_len as usize, actual_capaicty)}
+    }
+}
+impl Debug for CFString {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.as_string())
+    }
+}
+impl Display for CFString {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(&self.as_string())
     }
 }
 
